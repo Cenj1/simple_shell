@@ -1,80 +1,43 @@
 #include "shell.h"
 
 /**
- * cmp_env_name - compares env variables names
- * with the name passed.
- * @nenv: name of the environment variable
- * @name: name passed
+ * make_env - make the shell environment from the environment passed to main
+ * @env: environment passed to main
  *
- * Return: 0 if are not equal. Another value if they are.
+ * Return: pointer to the new environment
  */
-int cmp_env_name(const char *nenv, const char *name)
+
+char **make_env(char **env)
 {
-	int i;
+	char **newenv = NULL;
+	size_t i;
 
-	for (i = 0; nenv[i] != '='; i++)
+	for (i = 0; env[i] != NULL; i++)
+		;
+	newenv = malloc(sizeof(char *) * (i + 1));
+	if (newenv == NULL)
 	{
-		if (nenv[i] != name[i])
-		{
-			return (0);
-		}
+		perror("Fatal Error");
+		exit(1);
 	}
-
-	return (i + 1);
+	for (i = 0; env[i] != NULL; i++)
+		newenv[i] = _strdup(env[i]);
+	newenv[i] = NULL;
+	return (newenv);
 }
 
 /**
- * _getenv - get an environment variable
- * @name: name of the environment variable
- * @_environ: environment variable
+ * free_env - free the shell's environment
+ * @env: shell's environment
  *
- * Return: value of the environment variable if is found.
- * In other case, returns NULL.
+ * Return: void
  */
-char *_getenv(const char *name, char **_environ)
+
+void free_env(char **env)
 {
-	char *ptr_env;
-	int i, mov;
+	unsigned int i;
 
-	/* Initialize ptr_env value */
-	ptr_env = NULL;
-	mov = 0;
-	/* Compare all environment variables */
-	/* environ is declared in the header file */
-	for (i = 0; _environ[i]; i++)
-	{
-		/* If name and env are equal */
-		mov = cmp_env_name(_environ[i], name);
-		if (mov)
-		{
-			ptr_env = _environ[i];
-			break;
-		}
-	}
-
-	return (ptr_env + mov);
-}
-
-/**
- * _env - prints the evironment variables
- *
- * @datash: data relevant.
- * Return: 1 on success.
- */
-int _env(data_shell *datash)
-{
-	int i, j;
-
-	for (i = 0; datash->_environ[i]; i++)
-	{
-
-		for (j = 0; datash->_environ[i][j]; j++)
-			;
-
-		write(STDOUT_FILENO, datash->_environ[i], j);
-		write(STDOUT_FILENO, "\n", 1);
-	}
-	datash->status = 0;
-
-	return (1);
+	for (i = 0; env[i] != NULL; i++)
+		free(env[i]);
+	free(env);
 }

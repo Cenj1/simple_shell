@@ -1,142 +1,76 @@
 #include "shell.h"
 
 /**
- * strcat_cd - function that concatenates the message for cd error
+ * print_error - prints error messages to standard error
+ * @vars: pointer to struct of variables
+ * @msg: message to print out
  *
- * @datash: data relevant (directory)
- * @msg: message to print
- * @error: output message
- * @ver_str: counter lines
- * Return: error message
+ * Return: void
  */
-char *strcat_cd(data_shell *datash, char *msg, char *error, char *ver_str)
+void print_error(vars_t *vars, char *msg)
 {
-	char *illegal_flag;
+	char *count;
 
-	_strcpy(error, datash->av[0]);
-	_strcat(error, ": ");
-	_strcat(error, ver_str);
-	_strcat(error, ": ");
-	_strcat(error, datash->args[0]);
-	_strcat(error, msg);
-	if (datash->args[1][0] == '-')
+	_puts2(vars->argv[0]);
+	_puts2(": ");
+	count = _uitoa(vars->count);
+	_puts2(count);
+	free(count);
+	_puts2(": ");
+	_puts2(vars->av[0]);
+	if (msg)
 	{
-		illegal_flag = malloc(3);
-		illegal_flag[0] = '-';
-		illegal_flag[1] = datash->args[1][1];
-		illegal_flag[2] = '\0';
-		_strcat(error, illegal_flag);
-		free(illegal_flag);
+		_puts2(msg);
 	}
 	else
-	{
-		_strcat(error, datash->args[1]);
-	}
-
-	_strcat(error, "\n");
-	_strcat(error, "\0");
-	return (error);
-}
-/**
- * error_get_cd - error message for cd command in get_cd
- * @datash: data relevant (directory)
- * Return: Error message
- */
-char *error_get_cd(data_shell *datash)
-{
-	int length, len_id;
-	char *error, *ver_str, *msg;
-
-	ver_str = aux_itoa(datash->counter);
-	if (datash->args[1][0] == '-')
-	{
-		msg = ": Illegal option ";
-		len_id = 2;
-	}
-	else
-	{
-		msg = ": can't cd to ";
-		len_id = _strlen(datash->args[1]);
-	}
-
-	length = _strlen(datash->av[0]) + _strlen(datash->args[0]);
-	length += _strlen(ver_str) + _strlen(msg) + len_id + 5;
-	error = malloc(sizeof(char) * (length + 1));
-
-	if (error == 0)
-	{
-		free(ver_str);
-		return (NULL);
-	}
-
-	error = strcat_cd(datash, msg, error, ver_str);
-
-	free(ver_str);
-
-	return (error);
+		perror("");
 }
 
 /**
- * error_not_found - generic error message for command not found
- * @datash: data relevant (counter, arguments)
- * Return: Error message
- */
-char *error_not_found(data_shell *datash)
-{
-	int length;
-	char *error;
-	char *ver_str;
-
-	ver_str = aux_itoa(datash->counter);
-	length = _strlen(datash->av[0]) + _strlen(ver_str);
-	length += _strlen(datash->args[0]) + 16;
-	error = malloc(sizeof(char) * (length + 1));
-	if (error == 0)
-	{
-		free(error);
-		free(ver_str);
-		return (NULL);
-	}
-	_strcpy(error, datash->av[0]);
-	_strcat(error, ": ");
-	_strcat(error, ver_str);
-	_strcat(error, ": ");
-	_strcat(error, datash->args[0]);
-	_strcat(error, ": not found\n");
-	_strcat(error, "\0");
-	free(ver_str);
-	return (error);
-}
-/**
- * error_exit_shell - generic error message for exit in get_exit
- * @datash: data relevant (counter, arguments)
+ * _puts2 - prints a string to standard error
+ * @str: string to print
  *
- * Return: Error message
+ * Return: void
  */
-char *error_exit_shell(data_shell *datash)
+void _puts2(char *str)
 {
-	int length;
-	char *error;
-	char *ver_str;
+	ssize_t num, len;
 
-	ver_str = aux_itoa(datash->counter);
-	length = _strlen(datash->av[0]) + _strlen(ver_str);
-	length += _strlen(datash->args[0]) + _strlen(datash->args[1]) + 23;
-	error = malloc(sizeof(char) * (length + 1));
-	if (error == 0)
+	num = _strlen(str);
+	len = write(STDERR_FILENO, str, num);
+	if (len != num)
 	{
-		free(ver_str);
-		return (NULL);
+		perror("Fatal Error");
+		exit(1);
 	}
-	_strcpy(error, datash->av[0]);
-	_strcat(error, ": ");
-	_strcat(error, ver_str);
-	_strcat(error, ": ");
-	_strcat(error, datash->args[0]);
-	_strcat(error, ": Illegal number: ");
-	_strcat(error, datash->args[1]);
-	_strcat(error, "\n\0");
-	free(ver_str);
 
-	return (error);
+}
+
+/**
+ * _uitoa - converts an unsigned int to a string
+ * @count: unsigned int to convert
+ *
+ * Return: pointer to the converted string
+ */
+char *_uitoa(unsigned int count)
+{
+	char *numstr;
+	unsigned int tmp, digits;
+
+	tmp = count;
+	for (digits = 0; tmp != 0; digits++)
+		tmp /= 10;
+	numstr = malloc(sizeof(char) * (digits + 1));
+	if (numstr == NULL)
+	{
+		perror("Fatal Error1");
+		exit(127);
+	}
+	numstr[digits] = '\0';
+	for (--digits; count; --digits)
+	{
+		numstr[digits] = (count % 10) + '0';
+		count /= 10;
+	}
+	return (numstr);
 }

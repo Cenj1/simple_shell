@@ -1,106 +1,68 @@
 #include "shell.h"
 
 /**
- * _strcat - concatenate two strings
- * @dest: char pointer the dest of the copied str
- * @src: const char pointer the source of str
- * Return: the dest
+ * check_match - checks if a character matches any in a string
+ * @c: character to check
+ * @str: string to check
+ *
+ * Return: 1 if match, 0 if not
  */
-char *_strcat(char *dest, const char *src)
+
+unsigned int check_match(char c, const char *str)
 {
-	int i;
-	int j;
+	unsigned int i;
 
-	for (i = 0; dest[i] != '\0'; i++)
-		;
-
-	for (j = 0; src[j] != '\0'; j++)
+	for (i = 0; str[i] != '\0'; i++)
 	{
-		dest[i] = src[j];
-		i++;
+		if (c == str[i])
+			return (1);
 	}
-
-	dest[i] = '\0';
-	return (dest);
-}
-/**
- * *_strcpy - Copies the string pointed to by src.
- * @dest: Type char pointer the dest of the copied str
- * @src: Type char pointer the source of str
- * Return: the dest.
- */
-char *_strcpy(char *dest, char *src)
-{
-
-	size_t a;
-
-	for (a = 0; src[a] != '\0'; a++)
-	{
-		dest[a] = src[a];
-	}
-	dest[a] = '\0';
-
-	return (dest);
-}
-/**
- * _strcmp - Function that compares two strings.
- * @s1: type str compared
- * @s2: type str compared
- * Return: Always 0.
- */
-int _strcmp(char *s1, char *s2)
-{
-	int i;
-
-	for (i = 0; s1[i] == s2[i] && s1[i]; i++)
-		;
-
-	if (s1[i] > s2[i])
-		return (1);
-	if (s1[i] < s2[i])
-		return (-1);
 	return (0);
 }
-/**
- * _strchr - locates a character in a string,
- * @s: string.
- * @c: character.
- * Return: the pointer to the first occurrence of the character c.
- */
-char *_strchr(char *s, char c)
-{
-	unsigned int i = 0;
 
-	for (; *(s + i) != '\0'; i++)
-		if (*(s + i) == c)
-			return (s + i);
-	if (*(s + i) == c)
-		return (s + i);
-	return ('\0');
-}
 /**
- * _strspn - gets the length of a prefix substring.
- * @s: initial segment.
- * @accept: accepted bytes.
- * Return: the number of accepted bytes.
+ * new_strtok - custom strtok
+ * @str: string to tokenize
+ * @delim: delimiter to tokenize against
+ *
+ * Return: pointer to the next token or NULL
  */
-int _strspn(char *s, char *accept)
+char *new_strtok(char *str, const char *delim)
 {
-	int i, j, bool;
+	static char *token_start;
+	static char *next_token;
+	unsigned int i;
 
-	for (i = 0; *(s + i) != '\0'; i++)
+	if (str != NULL)
+		next_token = str;
+	token_start = next_token;
+	if (token_start == NULL)
+		return (NULL);
+	for (i = 0; next_token[i] != '\0'; i++)
 	{
-		bool = 1;
-		for (j = 0; *(accept + j) != '\0'; j++)
-		{
-			if (*(s + i) == *(accept + j))
-			{
-				bool = 0;
-				break;
-			}
-		}
-		if (bool == 1)
+		if (check_match(next_token[i], delim) == 0)
 			break;
 	}
-	return (i);
+	if (next_token[i] == '\0' || next_token[i] == '#')
+	{
+		next_token = NULL;
+		return (NULL);
+	}
+	token_start = next_token + i;
+	next_token = token_start;
+	for (i = 0; next_token[i] != '\0'; i++)
+	{
+		if (check_match(next_token[i], delim) == 1)
+			break;
+	}
+	if (next_token[i] == '\0')
+		next_token = NULL;
+	else
+	{
+		next_token[i] = '\0';
+		next_token = next_token + i + 1;
+		if (*next_token == '\0')
+			next_token = NULL;
+	}
+	return (token_start);
 }
